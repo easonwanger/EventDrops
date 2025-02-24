@@ -1,0 +1,22 @@
+sudo: false
+dist: xenial
+language: node_js
+node_js:
+  - 10.15.3
+addons:
+  firefox: latest
+cache:
+  directories:
+    - node_modules
+branches:
+  only:
+    - master
+install:
+  - npm install
+before_script:
+  - "export DISPLAY=:99.0"
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
+script:
+  - make test
+services:
+  - xvfb
