@@ -1,5 +1,6 @@
 import drop from './drop';
 import indicator from './indicator';
+import { throttle } from 'lodash';
 
 export default (config, xScale) => selection => {
     const {
@@ -37,7 +38,7 @@ export default (config, xScale) => selection => {
         .append('g')
         .classed('drops', true)
         .attr('transform', () => `translate(${labelWidth}, ${lineHeight / 2})`)
-        .call(drop(config, xScale));
+        .call(throttle(drop(config, xScale),200));
 
     drops
         .append('rect') // The rect allow us to size the drops g element
