@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3 Zoom Example</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <button id="btn">button</button>
+    <div >abcd
+
+        <p>1</p>
+    </div>
+    <div id="mydivs" >
+<p>2</p>
+<p>3</p>
+    </div>
+    <svg width="600" height="400" style="stroke: blue;">
+           <rect x="100" y="100" width="100" height="100" fill="red"></rect>
+    </svg>
+    <script>
+        const svg = d3.select("svg");
+        document.querySelector('#btn').addEventListener('click', function() {
+            console.log('click');
+            debugger
+            // resetZoom()
+            const pr  =d3.select('#mydivs').data([[{name:'a',commits:["a1","a2"]},{name:'b',commits:["b1","b2"]}]])
+            const mydiv_selection = d3.select('#mydivs').selectAll('div')
+            const r = mydiv_selection.data([[{name:'a',commits:["a1","a2"]},{name:'b',commits:["b1","b2"]}]])
+            const newselection = r.enter().append('div').text('div')
+            newselection.merge(mydiv_selection).call(s=>{
+                debugger
+                console.log(s)
+            })
+            console.log(newselection)
+            
+
+            // d3.selectAll('div').append('p').text('p');
+        });
+
+        function resetZoom() {
+            svg.transition()
+            .duration(750)
+            .call(zoom.transform, d3.zoomIdentity);
+        }
+
+        // 创建缩放行为
+        const zoom = d3.zoom()
+           .scaleExtent([0.5, 5])
+           .on("zoom", function (event) {
+                const transform = event.transform;
+                console.log(transform);
+                svg.selectAll("circle")
+                   .attr("transform", transform);
+                svg.selectAll("rect")
+                   .attr("transform", transform);
+            });
+
+        // 应用缩放行为到 SVG
+        svg.call(zoom);
+
+        // 添加一个圆形
+        svg.append("circle")
+           .attr("cx", 300)
+           .attr("cy", 200)
+           .attr("r", 50)
+           .attr("fill", "blue");
+    </script>
+</body>
+
+</html>

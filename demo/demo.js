@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import eventDrops from '../src';
 import '../src/style.css';
 import { gravatar, humanizeDate } from './utils';
+import _ from 'lodash';
 
 const repositories = require('./data.json');
 
@@ -10,6 +11,22 @@ const numberCommitsContainer = document.getElementById('numberCommits');
 const zoomStart = document.getElementById('zoomStart');
 const zoomEnd = document.getElementById('zoomEnd');
 
+function addMoreDummyData(repositories, count=10) {
+    repositories.forEach(repo => {
+        const newCommits = [];
+        repo.commits.forEach(commit => {     
+            for (let i = 0; i < count; i++) {
+                newCommits.push(Object.assign({}, commit, { date: new Date(new Date(commit.date).getTime()+Math.floor(Math.random()*200000000000)) }));
+            }      
+            
+        });
+        newCommits.forEach(commit => {
+            repo.commits.push(commit);
+        });
+    });
+    return repositories;
+}
+addMoreDummyData(repositories, 100);
 const updateCommitsInformation = chart => {
     const filteredData = chart
         .filteredData()

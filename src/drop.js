@@ -1,7 +1,14 @@
-import uniqBy from 'lodash.uniqby';
+import {uniqBy,sortedUniqBy} from 'lodash';
+import {sortField} from './config';
 
-const filterOverlappingDrop = (xScale, dropDate) => d =>
-    uniqBy(d.data, data => Math.round(xScale(dropDate(data))));
+const filterOverlappingDrop = (xScale) => d =>{
+    const uniq = sortedUniqBy(d.data, data =>{
+        return  Math.round(xScale(data[sortField]))
+         })
+    // console.log('uniq',uniq)    
+    return uniq;
+}
+    
 
 export default (config, xScale) => selection => {
     const {
@@ -17,7 +24,7 @@ export default (config, xScale) => selection => {
 
     const drops = selection
         .selectAll('.drop')
-        .data(filterOverlappingDrop(xScale, dropDate));
+        .data(filterOverlappingDrop(xScale));
 
     drops
         .enter()

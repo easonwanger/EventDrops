@@ -55,7 +55,7 @@ export default d3 => ({
         left: 10,
     },
     range: {
-        start: new Date(new Date().getTime() - 3600000 * 24 * 365), // one year ago
+        start: new Date(new Date().getTime() - 3600000 * 24 * 365*10), // one year ago
         end: new Date(),
     },
     zoom: {
@@ -79,3 +79,5 @@ export default d3 => ({
         extra: 1200,
     },
 });
+
+export const sortField = Symbol('sortField');

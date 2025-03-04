@@ -1,9 +1,10 @@
-import defaultsDeep from 'lodash.defaultsdeep';
+import {defaultsDeep,sortBy,sortedIndexBy} from 'lodash';
 
 import axis from './axis';
 import { getBreakpointLabel } from './breakpoint';
 import bounds from './bounds';
 import defaultConfiguration from './config';
+import {sortField} from './config';
 import dropLine from './dropLine';
 import zoomFactory from './zoom';
 import { getDomainTransform } from './zoom';
@@ -157,7 +158,11 @@ export default ({
 
             return dataSet.map(row => {
                 if (!row.fullData) {
-                    row.fullData = config.drops(row);
+                    config.drops(row).forEach(p => {
+                        p[sortField] = dropDate(p);
+                        
+                    });
+                    row.fullData = sortBy(config.drops(row),(d)=>d[sortField]);
                     if (!row.fullData) {
                         throw new Error(
                             'No drops data has been found. It looks by default in the `data` property. You can use the `drops` configuration parameter to tune it.'
@@ -165,9 +170,9 @@ export default ({
                     }
                 }
 
-                row.data = row.fullData.filter(d =>
-                    withinRange(dropDate(d), dateBounds)
-                );
+                const low = sortedIndexBy(row.fullData, {[sortField]:dateBounds[0]}, (d)=>d[sortField]);
+                const high = sortedIndexBy(row.fullData, {[sortField]:dateBounds[1]}, (d)=>d[sortField]);
+                row.data = row.fullData.slice(low, high);
 
                 return row;
             });

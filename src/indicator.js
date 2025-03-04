@@ -1,5 +1,7 @@
 import { isBefore } from './isBefore';
 import { isAfter } from './isAfter';
+import {sortField} from './config';
+import {throttle} from 'lodash';
 
 export default (config, xScale) => selection => {
     const {
@@ -11,16 +13,16 @@ export default (config, xScale) => selection => {
 
     const dateBounds = xScale.domain().map(d => new Date(d));
 
-    const indicators = selection.selectAll('.indicator').data(d => {
+    const indicators = selection.selectAll('.indicator').data(throttle(d => {
         const data = [];
-        if (d.fullData.some(event => isBefore(dropDate(event), dateBounds))) {
+        if (d.fullData.some(event => isBefore(event[sortField], dateBounds))) {
             data.push('before');
         }
-        if (d.fullData.some(event => isAfter(dropDate(event), dateBounds))) {
+        if (d.fullData.some(event => isAfter(event[sortField], dateBounds))) {
             data.push('after');
         }
         return data;
-    });
+    },200));
 
     indicators
         .enter()
