@@ -1,6 +1,6 @@
 import { isBefore } from './isBefore';
 import { isAfter } from './isAfter';
-import {sortField} from './config';
+import {sortField,lowHighPostion} from './config';
 import {throttle} from 'lodash';
 
 export default (config, xScale) => selection => {
@@ -15,10 +15,11 @@ export default (config, xScale) => selection => {
 
     const indicators = selection.selectAll('.indicator').data(throttle(d => {
         const data = [];
-        if (d.fullData.some(event => isBefore(event[sortField], dateBounds))) {
+        const {low,high} = d.data[lowHighPostion];
+        if (low > 0) {
             data.push('before');
         }
-        if (d.fullData.some(event => isAfter(event[sortField], dateBounds))) {
+        if (high < d.fullData.length ) {
             data.push('after');
         }
         return data;

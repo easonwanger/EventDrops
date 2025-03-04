@@ -4,7 +4,7 @@ import axis from './axis';
 import { getBreakpointLabel } from './breakpoint';
 import bounds from './bounds';
 import defaultConfiguration from './config';
-import {sortField} from './config';
+import {sortField,lowHighPostion} from './config';
 import dropLine from './dropLine';
 import zoomFactory from './zoom';
 import { getDomainTransform } from './zoom';
@@ -173,6 +173,7 @@ export default ({
                 const low = sortedIndexBy(row.fullData, {[sortField]:dateBounds[0]}, (d)=>d[sortField]);
                 const high = sortedIndexBy(row.fullData, {[sortField]:dateBounds[1]}, (d)=>d[sortField]);
                 row.data = row.fullData.slice(low, high);
+                row.data[lowHighPostion]={low,high}
 
                 return row;
             });

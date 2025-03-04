@@ -81,3 +81,4 @@ export default d3 => ({
 });
 
 export const sortField = Symbol('sortField');
+export const lowHighPostion = Symbol('lowHighPostion');
