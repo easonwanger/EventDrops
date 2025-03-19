@@ -66,7 +66,7 @@ export default (config, xScale) => selection => {
         .on('click', labelOnClick);
 
     lines.selectAll('.line-label').text(labelText);
-    drops.call(throttle(drop(config, xScale),200));
+    drops.call(drop(config, xScale));
 
     if (indicatorEnabled) {
         g.selectAll('.indicators').data(d => [d])

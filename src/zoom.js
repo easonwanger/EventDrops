@@ -1,3 +1,5 @@
+import { throttle } from 'lodash';
+
 export const getShiftedTransform = (
     originalTransform,
     labelsWidth,
@@ -81,7 +83,7 @@ export default (
 
     zoom.on('zoom.start', onZoomStart).on('zoom.end', onZoomEnd);
 
-    zoom.on('zoom', (ev, args) => {
+    const oz = throttle((ev, args) => {
         const transform = getShiftedTransform(
             ev.transform,
             labelsWidth,
@@ -96,7 +98,8 @@ export default (
         if (onZoom) {
             onZoom(args);
         }
-    });
+    },50)
+    zoom.on('zoom', oz);
 
     return zoom;
 };
