@@ -20,28 +20,29 @@ export default (config, xScale) => selection => {
     const lines = selection.selectAll('.drop-line').data(d => d);
 
     const g = lines
-        .enter()
-        .append('g')
+
+        .join('g')
         .classed('drop-line', true)
         .attr('fill', lineColor)
         .attr('transform', (_, index) => `translate(0, ${index * lineHeight})`);
 
-    g
-        .append('line')
+    g.selectAll('.line-separator').data(d => [d])
+        .join('line')
         .classed('line-separator', true)
         .attr('x1', labelWidth)
         .attr('x2', '100%')
         .attr('y1', () => lineHeight)
         .attr('y2', () => lineHeight);
 
-    const drops = g
-        .append('g')
+    const drops = g.selectAll('.drops').data(d => [d])
+        .join('g')
         .classed('drops', true)
         .attr('transform', () => `translate(${labelWidth}, ${lineHeight / 2})`)
-        .call(throttle(drop(config, xScale),200));
+        // .call(throttle(drop(config, xScale),200));
 
-    drops
-        .append('rect') // The rect allow us to size the drops g element
+        
+    drops.selectAll('rect').data(d => [d])
+        .join('rect') // The rect allow us to size the drops g element
         .attr('x', 0)
         .attr('y', -config.line.height / 2)
         .attr('width', 1) // For the rect to impact its parent size it must have a non zero width
@@ -52,8 +53,8 @@ export default (config, xScale) => selection => {
         drops.style('filter', 'url(#metaballs)');
     }
 
-    g
-        .append('text')
+    g.selectAll('.line-label').data(d => [d])
+        .join('text')
         .classed('line-label', true)
         .attr('x', labelWidth - labelPadding)
         .attr('y', lineHeight / 2)
@@ -65,11 +66,11 @@ export default (config, xScale) => selection => {
         .on('click', labelOnClick);
 
     lines.selectAll('.line-label').text(labelText);
-    lines.selectAll('.drops').call(drop(config, xScale));
+    drops.call(throttle(drop(config, xScale),200));
 
     if (indicatorEnabled) {
-        g
-            .append('g')
+        g.selectAll('.indicators').data(d => [d])
+            .join('g')
             .classed('indicators', true)
             .call(indicator(config, xScale));
 
