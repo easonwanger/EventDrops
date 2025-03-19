@@ -1,5 +1,6 @@
 import {uniqBy,sortedUniqBy} from 'lodash';
 import {sortField} from './config';
+import * as Comlink from "comlink";
 
 const filterOverlappingDrop = (xScale) => d =>{
     const uniq = sortedUniqBy(d.data, data =>{

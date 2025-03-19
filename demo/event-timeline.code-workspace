@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../../../lab/event-timeline"
+		},
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "EventDrops-master"
+	}
+}

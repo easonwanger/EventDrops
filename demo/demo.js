@@ -26,7 +26,7 @@ function addMoreDummyData(repositories, count=10) {
     });
     return repositories;
 }
-addMoreDummyData(repositories, 100);
+addMoreDummyData(repositories, 1);
 const updateCommitsInformation = chart => {
     const filteredData = chart
         .filteredData()

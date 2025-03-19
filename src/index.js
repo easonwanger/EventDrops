@@ -159,8 +159,7 @@ export default ({
             return dataSet.map(row => {
                 if (!row.fullData) {
                     config.drops(row).forEach(p => {
-                        p[sortField] = dropDate(p);
-                        
+                        p[sortField] = dropDate(p);                        
                     });
                     row.fullData = sortBy(config.drops(row),(d)=>d[sortField]);
                     if (!row.fullData) {
