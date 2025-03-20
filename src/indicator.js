@@ -1,7 +1,6 @@
 import { isBefore } from './isBefore';
 import { isAfter } from './isAfter';
 import {sortField,lowHighPostion} from './config';
-import {throttle} from 'lodash';
 
 export default (config, xScale) => selection => {
     const {
@@ -13,7 +12,7 @@ export default (config, xScale) => selection => {
 
     const dateBounds = xScale.domain().map(d => new Date(d));
 
-    const indicators = selection.selectAll('.indicator').data(throttle(d => {
+    const indicators = selection.selectAll('.indicator').data(d => {
         const data = [];
         const {low,high} = d.data[lowHighPostion];
         if (low > 0) {
@@ -23,7 +22,7 @@ export default (config, xScale) => selection => {
             data.push('after');
         }
         return data;
-    },200));
+    });
 
     indicators
         .enter()

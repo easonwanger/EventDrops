@@ -1,6 +1,5 @@
 import drop from './drop';
 import indicator from './indicator';
-import { throttle } from 'lodash';
 
 export default (config, xScale) => selection => {
     const {
