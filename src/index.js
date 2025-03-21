@@ -160,7 +160,8 @@ export default ({
     
     
     const draw = (config, scale,transform) => selection => {
-        const { drop: { date: dropDate }     ,       kCache, } = config;
+        let { drop: { date: dropDate }     ,       kCache, } = config;
+        kCache = kCache<10 ?10: kCache;
 
         const dateBounds = scale.domain().map(d => new Date(d));
         const filteredData = selection.data().map(dataSet => {
@@ -188,14 +189,20 @@ export default ({
                 row[dataToShow] = result;
                 row[dataToShow][lowHighPostion]={low,high}
 
-                row[dataToShowShrinked] = filterOverlappingDrop((()=>{
-                    if(transform?.k<kCache){
-                        const {result} = filterSortedByBounds(row.shrinkedData, dateBounds);               
-                        return result
-                    }
-                    return row[dataToShow]
+                let dts = row[dataToShow] 
+                if(transform?.k<kCache/1.5 && dts?.length>10000){
+                    const {result} = filterSortedByBounds(row.shrinkedData, dateBounds); 
+                    dts  =result; 
+                    // const s1 = filterOverlappingDrop( row[dataToShow],scale)
+                    // const s2 = filterOverlappingDrop( result,scale)
+                    // if(s1.length!==    s2.length ){
+                    //     console.log("error",s1.length,s2.length,s1,s2)
 
-                })() ,scale);
+                    // }        
+                
+                }
+
+                row[dataToShowShrinked] = filterOverlappingDrop( dts,scale);
 
                 return row;
             });

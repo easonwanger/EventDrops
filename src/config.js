@@ -78,7 +78,7 @@ export default d3 => ({
         large: 992,
         extra: 1200,
     },
-    kCache:10,
+    kCache:20,
 });
 
 export const sortField = Symbol('sortField');
