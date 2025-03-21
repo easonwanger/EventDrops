@@ -78,7 +78,10 @@ export default d3 => ({
         large: 992,
         extra: 1200,
     },
+    kCache:10,
 });
 
 export const sortField = Symbol('sortField');
 export const lowHighPostion = Symbol('lowHighPostion');
+export const dataToShow = Symbol('dataToShow');
+export const dataToShowShrinked = Symbol('dataToShowShrinked');

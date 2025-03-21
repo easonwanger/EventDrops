@@ -93,7 +93,7 @@ export default (
 
         const newScale = transform.rescaleX(xScale);
 
-        svg.call(draw(config, newScale));
+        svg.call(draw(config, newScale,transform));
 
         if (onZoom) {
             onZoom(args);

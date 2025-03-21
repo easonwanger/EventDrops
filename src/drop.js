@@ -1,15 +1,8 @@
-import {uniqBy,sortedUniqBy} from 'lodash';
-import {sortField} from './config';
-import * as Comlink from "comlink";
 
-const filterOverlappingDrop = (xScale) => d =>{
-    const uniq = sortedUniqBy(d.data, data =>{
-        return  Math.round(xScale(data[sortField]))
-         })
-    // console.log('uniq',uniq)    
-    return uniq;
-}
-    
+import {sortField,dataToShowShrinked} from './config';
+
+
+
 
 export default (config, xScale) => selection => {
     const {
@@ -25,7 +18,7 @@ export default (config, xScale) => selection => {
 
     const drops = selection
         .selectAll('.drop')
-        .data(filterOverlappingDrop(xScale));
+        .data(d=>d[dataToShowShrinked]);
 
     drops
         .enter()

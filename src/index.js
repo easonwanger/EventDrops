@@ -4,12 +4,12 @@ import axis from './axis';
 import { getBreakpointLabel } from './breakpoint';
 import bounds from './bounds';
 import defaultConfiguration from './config';
-import {sortField,lowHighPostion} from './config';
+import {sortField,lowHighPostion,dataToShow,dataToShowShrinked} from './config';
 import dropLine from './dropLine';
 import zoomFactory from './zoom';
 import { getDomainTransform } from './zoom';
 import { addMetaballsDefs } from './metaballs';
-
+import {uniqBy,sortedUniqBy} from 'lodash';
 import './style.css';
 import { withinRange } from './withinRange';
 
@@ -145,8 +145,22 @@ export default ({
         callback();
     };
 
-    const draw = (config, scale) => selection => {
-        const { drop: { date: dropDate } } = config;
+    const filterOverlappingDrop = (d,xScale)=>{
+        const uniq = sortedUniqBy(d, data =>{
+            return  Math.round(xScale(data[sortField]))
+             }) 
+        return uniq;
+    }
+
+    const filterSortedByBounds = (data, dateBounds) => { 
+        const low = sortedIndexBy(data, {[sortField]:dateBounds[0]}, (d)=>d[sortField]);
+        const high = sortedIndexBy(data, {[sortField]:dateBounds[1]}, (d)=>d[sortField]);
+        return {low,high,result:data.slice(low, high)}
+    }
+    
+    
+    const draw = (config, scale,transform) => selection => {
+        const { drop: { date: dropDate }     ,       kCache, } = config;
 
         const dateBounds = scale.domain().map(d => new Date(d));
         const filteredData = selection.data().map(dataSet => {
@@ -167,12 +181,21 @@ export default ({
                             'No drops data has been found. It looks by default in the `data` property. You can use the `drops` configuration parameter to tune it.'
                         );
                     }
+                    const sc = d3.scaleLinear().domain(scale.domain()).range([0, scale.range()[1]*kCache]);
+                    row.shrinkedData = filterOverlappingDrop(row.fullData,sc);
                 }
+                const {low,high,result} = filterSortedByBounds(row.fullData, dateBounds);
+                row[dataToShow] = result;
+                row[dataToShow][lowHighPostion]={low,high}
 
-                const low = sortedIndexBy(row.fullData, {[sortField]:dateBounds[0]}, (d)=>d[sortField]);
-                const high = sortedIndexBy(row.fullData, {[sortField]:dateBounds[1]}, (d)=>d[sortField]);
-                row.data = row.fullData.slice(low, high);
-                row.data[lowHighPostion]={low,high}
+                row[dataToShowShrinked] = filterOverlappingDrop((()=>{
+                    if(transform?.k<kCache){
+                        const {result} = filterSortedByBounds(row.shrinkedData, dateBounds);               
+                        return result
+                    }
+                    return row[dataToShow]
+
+                })() ,scale);
 
                 return row;
             });
