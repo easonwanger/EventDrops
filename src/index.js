@@ -1,36 +1,30 @@
-import {defaultsDeep,sortBy,sortedIndexBy} from 'lodash';
+import { defaultsDeep, sortBy, sortedIndexBy } from 'lodash';
 import * as d3 from 'd3';
 import axis from './axis';
 import { getBreakpointLabel } from './breakpoint';
 import bounds from './bounds';
 import defaultConfiguration from './config';
-import {eventDropsData,sortField} from './config';
+import { eventDropsData, sortField } from './config';
 import dropLine from './dropLine';
 import zoomFactory from './zoom';
 import { getDomainTransform } from './zoom';
 import { addMetaballsDefs } from './metaballs';
-import {uniqBy,sortedUniqBy} from 'lodash';
+import { uniqBy, sortedUniqBy } from 'lodash';
 import './style.css';
-import { withinRange } from './withinRange';
+
 
 // do not export anything else here to keep window.eventDrops as a function
-export default ({
-    global = window,
-    ...customConfiguration
-}) => {
-    const initChart = selection => {
-        selection.selectAll('svg').remove();
-
-        const root = selection.selectAll('svg').data(selection.data());
-        root.exit().remove();
-
+export default ({ global = window, ...customConfiguration }) => {
+    const initChart = (selection) => {
+     
         const config = defaultsDeep(
             customConfiguration || {},
             defaultConfiguration(d3)
         );
 
         const {
-            drops,
+            dropsData,
+            getDrops,
             zoom: zoomConfig,
             drop: { onClick, onMouseOut, onMouseOver },
             metaballs,
@@ -40,6 +34,10 @@ export default ({
             margin,
             breakpoints,
         } = config;
+
+        selection.selectAll('svg').remove();
+        const root = selection.selectAll('svg').data([dropsData]);
+        root.exit().remove();
 
         // Follow margins conventions (https://bl.ocks.org/mbostock/3019563)
         const width = selection.node().clientWidth - margin.left - margin.right;
@@ -73,7 +71,6 @@ export default ({
                     zoom,
                     xScale,
                     draw,
-        
                     width,
                     height
                 )
@@ -87,8 +84,7 @@ export default ({
                     xScale,
                     width
                 );
-                svg
-                    .transition()
+                svg.transition()
                     .ease(ease)
                     .delay(delay)
                     .duration(duration)
@@ -100,21 +96,18 @@ export default ({
             svg.call(addMetaballsDefs(config));
         }
 
-        svg
-            .merge(root)
-            .attr(
-                'height',
-                d => (d.length + 1) * lineHeight + margin.top + margin.bottom
-            );
+        svg.merge(root).attr(
+            'height',
+            (d) => (d.length + 1) * lineHeight + margin.top + margin.bottom
+        );
 
-        svg
-            .append('g')
+        svg.append('g')
             .classed('viewport', true)
             .attr('transform', `translate(${margin.left},${margin.top})`)
-            .call(draw(config, xScale,undefined,true));
+            .call(draw(config, xScale, undefined, true));
     };
 
-    const chart = selection => {
+    const chart = (selection) => {
         chart._initialize = () => initChart(selection);
         chart._initialize();
 
@@ -142,80 +135,107 @@ export default ({
         callback();
     };
 
-    const filterOverlappingDrop = (d,xScale)=>{
-        const uniq = sortedUniqBy(d, data =>{
-            return  Math.round(xScale(data[sortField]))
-             }) 
+    const filterOverlappingDrop = (d, xScale) => {
+        const uniq = sortedUniqBy(d, (data) => {
+            return Math.round(xScale(data[sortField]));
+        });
         return uniq;
-    }
+    };
 
-    const filterSortedByBounds = (data, dateBounds) => { 
-        const low = sortedIndexBy(data, {[sortField]:dateBounds[0]}, (d)=>d[sortField]);
-        const high = sortedIndexBy(data, {[sortField]:dateBounds[1]}, (d)=>d[sortField]);
-        return {low,high,result:data.slice(low, high)}
-    }
-    
-    
-    const draw = (config, scale,transform,initialize=false) => selection => {
-        let { drop: { date: dropDate }     ,       kCache, } = config;
-        kCache = kCache<10 ?10: kCache;
+    const filterSortedByBounds = (data, dateBounds) => {
+        const low = sortedIndexBy(
+            data,
+            { [sortField]: dateBounds[0] },
+            (d) => d[sortField]
+        );
+        const high = sortedIndexBy(
+            data,
+            { [sortField]: dateBounds[1] },
+            (d) => d[sortField]
+        );
+        return { low, high, result: data.slice(low, high) };
+    };
 
-        const dateBounds = scale.domain().map(d => new Date(d));
-        const filteredData = selection.data().map(dataSet => {
-            if (!Array.isArray(dataSet)) {
-                throw new Error(
-                    'Selection data is not an array. Are you sure you provided an array of arrays to `data` function?'
-                );
-            }
+    const draw =
+        (config, scale, transform, initialize = false) =>
+        (selection) => {
+            let {
+                drop: { getDate: getDate },
+                kCache,
+            } = config;
+            kCache = kCache < 10 ? 10 : kCache;//filterOverlappingDrop is used to shrink drops number. the range (of scale) used to shrink is kCache * currentRange(viewport)
 
-            return dataSet.map(row => {    
-                if(initialize)   {
-                    delete row[eventDropsData]  
-                }       
-                if (!row[eventDropsData]) {
-                    config.drops(row).forEach(p => {
-                        p[sortField] = dropDate(p);                        
-                    });
-                    row[eventDropsData] = sortBy(config.drops(row),(d)=>d[sortField]);
-                    const fullData = row[eventDropsData];
-                    if (!fullData) {
-                        throw new Error(
-                            'No drops data has been found. It looks by default in the `data` property. You can use the `drops` configuration parameter to tune it.'
+            const dateBounds = scale.domain().map((d) => new Date(d));
+            const filteredData = selection.data().map((dataSet) => {
+                if (!Array.isArray(dataSet)) {
+                    throw new Error(
+                        'Selection data is not an array. Are you sure you provided an array of arrays to `data` function?'
+                    );
+                }
+
+                return dataSet.map((row) => {
+                    if (initialize) {
+                        delete row[eventDropsData];
+                    }
+                    if (!row[eventDropsData]) {
+                        config.getDrops(row).forEach((p) => {
+                            p[sortField] = getDate(p);
+                        });
+                        row[eventDropsData] = sortBy(
+                            config.getDrops(row),
+                            (d) => d[sortField]
+                        );
+                        const fullData = row[eventDropsData];
+                        if (!fullData) {
+                            throw new Error(
+                                'No drops data has been found. It looks by default in the `data` property. You can use the `drops` configuration parameter to tune it.'
+                            );
+                        }
+                        const sc = d3
+                            .scaleLinear()
+                            .domain(scale.domain())
+                            .range([0, scale.range()[1] * kCache]);
+                        fullData.shrinkedData = filterOverlappingDrop(
+                            fullData,
+                            sc
                         );
                     }
-                    const sc = d3.scaleLinear().domain(scale.domain()).range([0, scale.range()[1]*kCache]);
-                    fullData.shrinkedData = filterOverlappingDrop(fullData,sc);
-                }
-                const fullData = row[eventDropsData];
-                const {low,high,result} = filterSortedByBounds(fullData, dateBounds);
-                fullData.dataInRange = result;
-                fullData.lowHighPostion={low,high}
+                    const fullData = row[eventDropsData];
+                    const { low, high, result } = filterSortedByBounds(
+                        fullData,
+                        dateBounds
+                    );
+                    fullData.dataInRange = result;
+                    fullData.lowHighPostion = { low, high };
 
-                let dts = result
-                if(transform?.k<kCache/1.5 && dts?.length>10000){
-                    const {result} = filterSortedByBounds(fullData.shrinkedData, dateBounds); 
-                    dts  =result;                 
-                }
+                    let dts = result;
+                    if (transform?.k < kCache / 1.5 && dts?.length > 10000) {
+                        const { result } = filterSortedByBounds(
+                            fullData.shrinkedData,
+                            dateBounds
+                        );
+                        dts = result;
+                    }
 
-                fullData.dataToShow = filterOverlappingDrop( dts,scale);
+                    fullData.dataToShow = filterOverlappingDrop(dts, scale);
 
-                return row;
+                    return row;
+                });
             });
-        });
 
-        chart._scale = scale;
-        chart._filteredData = filteredData[0];
+            chart._scale = scale;
+            chart._filteredData = filteredData[0];
 
-        selection
-            .data(filteredData)
-            .call(axis(d3, config, scale, chart.currentBreakpointLabel))
-            .call(dropLine(config, scale))
-            .call(bounds(config, scale));
-    };
+            selection
+                .data(filteredData)
+                .call(axis(d3, config, scale, chart.currentBreakpointLabel))
+                .call(dropLine(config, scale))
+                .call(bounds(config, scale));
+        };
 
     chart.draw = draw;
 
     return chart;
 };
 
-export {eventDropsData}
+export { eventDropsData };

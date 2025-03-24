@@ -24,11 +24,11 @@ export default d3 => ({
         verticalGrid: false,
         tickPadding: 6,
     },
-    drops: row => row.data,
+    getDrops: row => row.data,
     drop: {
         color: null,
         radius: 5,
-        date: d => new Date(d),
+        getDate: d => new Date(d),
         onClick: () => {},
         onMouseOver: () => {},
         onMouseOut: () => {},

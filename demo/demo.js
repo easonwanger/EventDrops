@@ -11,16 +11,22 @@ const numberCommitsContainer = document.getElementById('numberCommits');
 const zoomStart = document.getElementById('zoomStart');
 const zoomEnd = document.getElementById('zoomEnd');
 
-function addMoreDummyData(repositories, count=10) {
-    repositories.forEach(repo => {
+function addMoreDummyData(repositories, count = 10) {
+    repositories.forEach((repo) => {
         const newCommits = [];
-        repo.commits.forEach(commit => {     
+        repo.commits.forEach((commit) => {
             for (let i = 0; i < count; i++) {
-                newCommits.push(Object.assign({}, commit, { date: new Date(new Date(commit.date).getTime()+Math.floor(Math.random()*200000000000)) }));
-            }      
-            
+                newCommits.push(
+                    Object.assign({}, commit, {
+                        date: new Date(
+                            new Date(commit.date).getTime() +
+                                Math.floor(Math.random() * 200000000000)
+                        ),
+                    })
+                );
+            }
         });
-        newCommits.forEach(commit => {
+        newCommits.forEach((commit) => {
             repo.commits.push(commit);
         });
     });
@@ -28,7 +34,7 @@ function addMoreDummyData(repositories, count=10) {
 }
 addMoreDummyData(repositories, 1);
 // repositories.splice(0,2)
-const updateCommitsInformation = chart => {
+const updateCommitsInformation = (chart) => {
     const filteredData = chart
         .filteredData()
         .reduce((total, repo) => total.concat(repo.data), []);
@@ -45,12 +51,17 @@ const tooltip = d3
     .style('opacity', 0)
     .style('pointer-events', 'auto');
 
+const repositoriesData = repositories.map((repository) => ({
+    name: repository.name,
+    data: repository.commits,
+}));
 const chart = eventDrops({
+    dropsData: repositoriesData,
     zoom: {
         onZoomEnd: () => updateCommitsInformation(chart),
     },
     drop: {
-        date: d => new Date(d.date),
+        getDate: (d) => new Date(d.date),
         onMouseOver: (ev, commit) => {
             tooltip
                 .transition()
@@ -94,17 +105,8 @@ const chart = eventDrops({
                 .style('pointer-events', 'none');
         },
     },
-
 });
 
-const repositoriesData = repositories.map(repository => ({
-    name: repository.name,
-    data: repository.commits,
-}));
-
-d3
-    .select('#eventdrops-demo')
-    .data([repositoriesData])
-    .call(chart);
+d3.select('#eventdrops-demo').call(chart);
 
 updateCommitsInformation(chart);

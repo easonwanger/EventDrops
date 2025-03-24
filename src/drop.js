@@ -1,15 +1,12 @@
 
-import {sortField,eventDropsData} from './config';
-
-
-
+import {eventDropsData} from './config';
 
 export default (config, xScale) => selection => {
     const {
         drop: {
             color: dropColor,
             radius: dropRadius,
-            date: dropDate,
+            getDate: getDate,
             onClick,
             onMouseOver,
             onMouseOut,
@@ -30,7 +27,7 @@ export default (config, xScale) => selection => {
         .merge(drops)
         .attr('r', dropRadius)
         .attr('fill', dropColor)
-        .attr('cx', d => xScale(dropDate(d)));
+        .attr('cx', d => xScale(getDate(d)));
 
     drops
         .exit()
