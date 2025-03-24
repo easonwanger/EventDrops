@@ -27,6 +27,7 @@ function addMoreDummyData(repositories, count=10) {
     return repositories;
 }
 addMoreDummyData(repositories, 1);
+// repositories.splice(0,2)
 const updateCommitsInformation = chart => {
     const filteredData = chart
         .filteredData()
@@ -45,7 +46,6 @@ const tooltip = d3
     .style('pointer-events', 'auto');
 
 const chart = eventDrops({
-    d3,
     zoom: {
         onZoomEnd: () => updateCommitsInformation(chart),
     },
@@ -94,6 +94,7 @@ const chart = eventDrops({
                 .style('pointer-events', 'none');
         },
     },
+
 });
 
 const repositoriesData = repositories.map(repository => ({

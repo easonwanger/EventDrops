@@ -53,7 +53,7 @@ export default (
     zoom,
     xScale,
     draw,
-    getEvent,
+
     width,
     height
 ) => {

@@ -80,8 +80,8 @@ export default d3 => ({
     },
     kCache:20,
 });
-
+export const eventDropsData = Symbol('eventDrops');
 export const sortField = Symbol('sortField');
-export const lowHighPostion = Symbol('lowHighPostion');
-export const dataToShow = Symbol('dataToShow');
-export const dataToShowShrinked = Symbol('dataToShowShrinked');
+
+
+

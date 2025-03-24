@@ -1,5 +1,5 @@
 
-import {sortField,dataToShowShrinked} from './config';
+import {sortField,eventDropsData} from './config';
 
 
 
@@ -18,7 +18,7 @@ export default (config, xScale) => selection => {
 
     const drops = selection
         .selectAll('.drop')
-        .data(d=>d[dataToShowShrinked]);
+        .data(d=>d[eventDropsData].dataToShow);
 
     drops
         .enter()

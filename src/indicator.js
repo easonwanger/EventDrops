@@ -1,6 +1,6 @@
 import { isBefore } from './isBefore';
 import { isAfter } from './isAfter';
-import {sortField,lowHighPostion,dataToShow} from './config';
+import {eventDropsData} from './config';
 
 export default (config, xScale) => selection => {
     const {
@@ -14,11 +14,11 @@ export default (config, xScale) => selection => {
 
     const indicators = selection.selectAll('.indicator').data(d => {
         const data = [];
-        const {low,high} = d[dataToShow][lowHighPostion];
+        const {low,high} = d[eventDropsData].lowHighPostion;
         if (low > 0) {
             data.push('before');
         }
-        if (high < d.fullData.length ) {
+        if (high < d[eventDropsData].length ) {
             data.push('after');
         }
         return data;

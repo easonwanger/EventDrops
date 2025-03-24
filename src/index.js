@@ -1,10 +1,10 @@
 import {defaultsDeep,sortBy,sortedIndexBy} from 'lodash';
-
+import * as d3 from 'd3';
 import axis from './axis';
 import { getBreakpointLabel } from './breakpoint';
 import bounds from './bounds';
 import defaultConfiguration from './config';
-import {sortField,lowHighPostion,dataToShow,dataToShowShrinked} from './config';
+import {eventDropsData,sortField} from './config';
 import dropLine from './dropLine';
 import zoomFactory from './zoom';
 import { getDomainTransform } from './zoom';
@@ -15,7 +15,6 @@ import { withinRange } from './withinRange';
 
 // do not export anything else here to keep window.eventDrops as a function
 export default ({
-    d3 = window.d3,
     global = window,
     ...customConfiguration
 }) => {
@@ -41,8 +40,6 @@ export default ({
             margin,
             breakpoints,
         } = config;
-
-        const getEvent = () => d3.event; // keep d3.event mutable see https://github.com/d3/d3/issues/2733
 
         // Follow margins conventions (https://bl.ocks.org/mbostock/3019563)
         const width = selection.node().clientWidth - margin.left - margin.right;
@@ -76,7 +73,7 @@ export default ({
                     zoom,
                     xScale,
                     draw,
-                    getEvent,
+        
                     width,
                     height
                 )
@@ -171,38 +168,33 @@ export default ({
                 );
             }
 
-            return dataSet.map(row => {
-                if (!row.fullData) {
+            return dataSet.map(row => {                
+                if (!row[eventDropsData]) {
                     config.drops(row).forEach(p => {
                         p[sortField] = dropDate(p);                        
                     });
-                    row.fullData = sortBy(config.drops(row),(d)=>d[sortField]);
-                    if (!row.fullData) {
+                    row[eventDropsData] = sortBy(config.drops(row),(d)=>d[sortField]);
+                    const fullData = row[eventDropsData];
+                    if (!fullData) {
                         throw new Error(
                             'No drops data has been found. It looks by default in the `data` property. You can use the `drops` configuration parameter to tune it.'
                         );
                     }
                     const sc = d3.scaleLinear().domain(scale.domain()).range([0, scale.range()[1]*kCache]);
-                    row.shrinkedData = filterOverlappingDrop(row.fullData,sc);
+                    fullData.shrinkedData = filterOverlappingDrop(fullData,sc);
                 }
-                const {low,high,result} = filterSortedByBounds(row.fullData, dateBounds);
-                row[dataToShow] = result;
-                row[dataToShow][lowHighPostion]={low,high}
+                const fullData = row[eventDropsData];
+                const {low,high,result} = filterSortedByBounds(fullData, dateBounds);
+                fullData.dataInRange = result;
+                fullData.lowHighPostion={low,high}
 
-                let dts = row[dataToShow] 
+                let dts = result
                 if(transform?.k<kCache/1.5 && dts?.length>10000){
-                    const {result} = filterSortedByBounds(row.shrinkedData, dateBounds); 
-                    dts  =result; 
-                    // const s1 = filterOverlappingDrop( row[dataToShow],scale)
-                    // const s2 = filterOverlappingDrop( result,scale)
-                    // if(s1.length!==    s2.length ){
-                    //     console.log("error",s1.length,s2.length,s1,s2)
-
-                    // }        
-                
+                    const {result} = filterSortedByBounds(fullData.shrinkedData, dateBounds); 
+                    dts  =result;                 
                 }
 
-                row[dataToShowShrinked] = filterOverlappingDrop( dts,scale);
+                fullData.dataToShow = filterOverlappingDrop( dts,scale);
 
                 return row;
             });
