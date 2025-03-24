@@ -111,7 +111,7 @@ export default ({
             .append('g')
             .classed('viewport', true)
             .attr('transform', `translate(${margin.left},${margin.top})`)
-            .call(draw(config, xScale));
+            .call(draw(config, xScale,undefined,true));
     };
 
     const chart = selection => {
@@ -156,7 +156,7 @@ export default ({
     }
     
     
-    const draw = (config, scale,transform) => selection => {
+    const draw = (config, scale,transform,initialize=false) => selection => {
         let { drop: { date: dropDate }     ,       kCache, } = config;
         kCache = kCache<10 ?10: kCache;
 
@@ -168,7 +168,10 @@ export default ({
                 );
             }
 
-            return dataSet.map(row => {                
+            return dataSet.map(row => {    
+                if(initialize)   {
+                    delete row[eventDropsData]  
+                }       
                 if (!row[eventDropsData]) {
                     config.drops(row).forEach(p => {
                         p[sortField] = dropDate(p);                        
