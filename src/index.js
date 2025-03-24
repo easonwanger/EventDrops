@@ -217,3 +217,5 @@ export default ({
 
     return chart;
 };
+
+export {eventDropsData}

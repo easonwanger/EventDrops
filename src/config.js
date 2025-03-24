@@ -1,5 +1,6 @@
 import enLocale from 'd3-time-format/locale/en-US';
-
+export const eventDropsData = Symbol('eventDrops');
+export const sortField = Symbol('sortField');
 export default d3 => ({
     locale: enLocale,
     metaballs: {
@@ -34,7 +35,7 @@ export default d3 => ({
     },
     label: {
         padding: 20,
-        text: d => `${d.name} (${d.data.length})`,
+        text: d => `${d.name} (${d[eventDropsData].dataInRange.length})`,
         onMouseOver: () => {},
         onMouseOut: () => {},
         onClick: () => {},
@@ -80,8 +81,7 @@ export default d3 => ({
     },
     kCache:20,
 });
-export const eventDropsData = Symbol('eventDrops');
-export const sortField = Symbol('sortField');
+
 
 
 
